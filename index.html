@@ -3,67 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desenhando um Coração</title>
+    <title>Para Gabriella Torres</title>
     <style>
+        /* Fundo romântico em degradê */
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            font-family: Arial, sans-serif;
         }
+        
+        /* Canvas sem borda */
         canvas {
-            border: 1px solid #000;
+            border: none;
+        }
+
+        /* Estilo para o texto central */
+        #heartText {
+            position: absolute;
+            color: red;
+            font-family: "Brush Script MT", cursive; /* Fonte cursiva romântica */
+            text-align: center;
+            font-size: 2.5em; /* Tamanho ajustado */
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Sombra para destacar o texto */
+            transform: translate(-50%, -50%); /* Centraliza o texto */
         }
     </style>
 </head>
 <body>
+    <!-- Canvas para o desenho do coração -->
     <canvas id="heartCanvas"></canvas>
+    
+    <!-- Texto centralizado no coração -->
+    <div id="heartText">Gabriella Torres</div>
 
     <script>
         const canvas = document.getElementById("heartCanvas");
         const ctx = canvas.getContext("2d");
+        const heartText = document.getElementById("heartText");
 
-        // Função para ajustar o tamanho do canvas com base na tela
         function resizeCanvas() {
-            const size = Math.min(window.innerWidth, window.innerHeight) * 0.8; // Canvas com 80% do menor lado
+            const size = Math.min(window.innerWidth, window.innerHeight) * 0.8;
             canvas.width = size;
             canvas.height = size;
+
+            // Centraliza o texto exatamente no meio do coração
+            heartText.style.top = `${canvas.height / 2 + canvas.offsetTop}px`;
+            heartText.style.left = `${canvas.width / 2 + canvas.offsetLeft}px`;
         }
 
-        resizeCanvas(); // Chama a função ao carregar
-
-        window.addEventListener('resize', resizeCanvas); // Redimensiona o canvas se a tela mudar
-
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const scale = canvas.width / 30;  // Escala ajustada para diferentes tamanhos de tela
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
 
         let angle = 0;
 
         function drawHeart() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);  // Limpa o canvas a cada quadro
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = canvas.width / 34;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = "red";
 
-            // Fórmula paramétrica para desenhar um coração
+            // Coração com espessura maior
             for (let i = 0; i <= angle; i += 2) {
                 const radian = (i * Math.PI) / 180;
                 const x = centerX + scale * 16 * Math.pow(Math.sin(radian), 3);
                 const y = centerY - scale * (13 * Math.cos(radian) - 5 * Math.cos(2 * radian) - 2 * Math.cos(3 * radian) - Math.cos(4 * radian));
 
                 ctx.beginPath();
-                ctx.arc(x, y, 1, 0, Math.PI * 2, true);  // Desenha o ponto
+                ctx.arc(x, y, 3, 0, Math.PI * 2, true);  // Define o raio para 4
                 ctx.fill();
             }
 
             angle += 2;
             if (angle <= 360) {
-                requestAnimationFrame(drawHeart);  // Chama a função novamente para animação
+                requestAnimationFrame(drawHeart);
             }
         }
 
-        drawHeart();  // Inicia o desenho do coração
+        drawHeart();
     </script>
 </body>
 </html>
