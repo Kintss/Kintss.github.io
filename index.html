@@ -1,1 +1,69 @@
-Hello World
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desenhando um Coração</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="heartCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById("heartCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Função para ajustar o tamanho do canvas com base na tela
+        function resizeCanvas() {
+            const size = Math.min(window.innerWidth, window.innerHeight) * 0.8; // Canvas com 80% do menor lado
+            canvas.width = size;
+            canvas.height = size;
+        }
+
+        resizeCanvas(); // Chama a função ao carregar
+
+        window.addEventListener('resize', resizeCanvas); // Redimensiona o canvas se a tela mudar
+
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const scale = canvas.width / 30;  // Escala ajustada para diferentes tamanhos de tela
+
+        let angle = 0;
+
+        function drawHeart() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);  // Limpa o canvas a cada quadro
+            ctx.fillStyle = "red";
+
+            // Fórmula paramétrica para desenhar um coração
+            for (let i = 0; i <= angle; i += 2) {
+                const radian = (i * Math.PI) / 180;
+                const x = centerX + scale * 16 * Math.pow(Math.sin(radian), 3);
+                const y = centerY - scale * (13 * Math.cos(radian) - 5 * Math.cos(2 * radian) - 2 * Math.cos(3 * radian) - Math.cos(4 * radian));
+
+                ctx.beginPath();
+                ctx.arc(x, y, 1, 0, Math.PI * 2, true);  // Desenha o ponto
+                ctx.fill();
+            }
+
+            angle += 2;
+            if (angle <= 360) {
+                requestAnimationFrame(drawHeart);  // Chama a função novamente para animação
+            }
+        }
+
+        drawHeart();  // Inicia o desenho do coração
+    </script>
+</body>
+</html>
