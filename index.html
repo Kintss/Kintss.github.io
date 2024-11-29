@@ -1,91 +1,149 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Para Gabriella Torres</title>
-    <style>
-        /* Fundo romântico em degradê */
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-            font-family: Arial, sans-serif;
-        }
-        
-        /* Canvas sem borda */
-        canvas {
-            border: none;
-        }
-
-        /* Estilo para o texto central */
-        #heartText {
-            position: absolute;
-            color: red;
-            font-family: "Brush Script MT", cursive; /* Fonte cursiva romântica */
-            text-align: center;
-            font-size: 2.5em; /* Tamanho ajustado */
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Sombra para destacar o texto */
-            transform: translate(-50%, -50%); /* Centraliza o texto */
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz do Amor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      text-align: center;
+      padding: 20px;
+    }
+    .question-box {
+      background: #fff;
+      padding: 20px;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 500px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .question {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    .options button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .correct {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .wrong {
+      background-color: #F44336;
+      color: white;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <!-- Canvas para o desenho do coração -->
-    <canvas id="heartCanvas"></canvas>
-    
-    <!-- Texto centralizado no coração -->
-    <div id="heartText">Gabriella Torres</div>
 
-    <script>
-        const canvas = document.getElementById("heartCanvas");
-        const ctx = canvas.getContext("2d");
-        const heartText = document.getElementById("heartText");
+  <h1>Quiz do Amor ❤️</h1>
+  <div id="quiz-container">
+    <div class="question-box">
+      <div id="question" class="question">Clique para começar o quiz!</div>
+      <div id="options" class="options"></div>
+    </div>
+  </div>
 
-        function resizeCanvas() {
-            const size = Math.min(window.innerWidth, window.innerHeight) * 0.8;
-            canvas.width = size;
-            canvas.height = size;
+  <audio id="correct-audio" src="yeah.mp3"></audio>
+  <audio id="wrong-audio" src="error.mp3"></audio>
 
-            // Centraliza o texto exatamente no meio do coração
-            heartText.style.top = `${canvas.height / 2 + canvas.offsetTop}px`;
-            heartText.style.left = `${canvas.width / 2 + canvas.offsetLeft}px`;
+  <script>
+    const quiz = [
+      { 
+        level: "Nível 1",
+        questions: [
+          { question: "Quantos passos demos no nosso primeiro encontro?", options: ["2.356", "1.948", "3.127", "Quem sabe?"], correct: 3 },
+          { question: "Quantas estrelas no céu eu contei pensando em você?", options: ["1.000", "Infinito", "5", "Nenhuma"], correct: 1 }
+        ]
+      },
+      { 
+        level: "Nível 2",
+        questions: [
+          { question: "Qual foi o dia exato em que nos conhecemos?", options: ["10/01", "15/02", "20/03", "25/04"], correct: 0 },
+          { question: "Qual roupa eu usava no nosso primeiro encontro?", options: ["Camisa branca", "Camiseta azul", "Terno", "Moleton"], correct: 1 }
+        ]
+      },
+      { 
+        level: "Nível 3",
+        questions: [
+          { question: "Qual é o meu nome?", options: ["Pedro", "Carlos", "João", "Você sabe!"], correct: 3 },
+          { question: "O que eu mais amo em você?", options: ["Sorriso", "Tudo", "Risada", "Seus olhos"], correct: 1 }
+        ]
+      }
+    ];
+
+    let currentRound = 0;
+    let currentQuestion = 0;
+    let correctAnswers = 0;
+
+    const questionElement = document.getElementById("question");
+    const optionsElement = document.getElementById("options");
+    const correctAudio = document.getElementById("correct-audio");
+    const wrongAudio = document.getElementById("wrong-audio");
+
+    function loadQuestion() {
+      const round = quiz[currentRound];
+      const questionData = round.questions[currentQuestion];
+
+      questionElement.textContent = questionData.question;
+      optionsElement.innerHTML = "";
+
+      questionData.options.forEach((option, index) => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.onclick = () => handleAnswer(index);
+        optionsElement.appendChild(button);
+      });
+    }
+
+    function handleAnswer(selected) {
+      const round = quiz[currentRound];
+      const questionData = round.questions[currentQuestion];
+
+      if (selected === questionData.correct) {
+        correctAudio.play();
+        correctAnswers++;
+      } else {
+        wrongAudio.play();
+        if ("vibrate" in navigator) navigator.vibrate(200);
+      }
+
+      currentQuestion++;
+
+      if (currentQuestion >= round.questions.length) {
+        currentRound++;
+        currentQuestion = 0;
+
+        if (currentRound >= quiz.length || correctAnswers >= 3) {
+          finishQuiz();
+          return;
         }
+      }
 
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+      loadQuestion();
+    }
 
-        let angle = 0;
+    function finishQuiz() {
+      questionElement.textContent = "Parabéns! O quiz terminou!";
+      optionsElement.innerHTML = `<p>Você acertou ${correctAnswers} perguntas!</p>`;
+    }
 
-        function drawHeart() {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const scale = canvas.width / 34;
+    questionElement.onclick = loadQuestion; // Inicia ao clicar
+  </script>
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "red";
-
-            // Coração com espessura maior
-            for (let i = 0; i <= angle; i += 2) {
-                const radian = (i * Math.PI) / 180;
-                const x = centerX + scale * 16 * Math.pow(Math.sin(radian), 3);
-                const y = centerY - scale * (13 * Math.cos(radian) - 5 * Math.cos(2 * radian) - 2 * Math.cos(3 * radian) - Math.cos(4 * radian));
-
-                ctx.beginPath();
-                ctx.arc(x, y, 3, 0, Math.PI * 2, true);  // Define o raio para 4
-                ctx.fill();
-            }
-
-            angle += 2;
-            if (angle <= 360) {
-                requestAnimationFrame(drawHeart);
-            }
-        }
-
-        drawHeart();
-    </script>
 </body>
 </html>
