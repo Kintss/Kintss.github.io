@@ -11,6 +11,8 @@
       text-align: center;
       padding: 20px;
       transition: background-color 1s ease;
+      position: relative;
+      overflow: hidden; /* Para garantir que a animação não ultrapasse a tela */
     }
     .box {
       background: #fff;
@@ -21,6 +23,7 @@
       border: 2px solid #ddd;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      position: relative; /* Necessário para posicionar o botão corretamente */
     }
     button {
       display: block;
@@ -59,11 +62,12 @@
       position: absolute;
       font-size: 24px;
       animation: fall 2s linear infinite;
+      z-index: 10; /* Para garantir que os corações apareçam acima de outros elementos */
     }
 
     @keyframes fall {
       to {
-        transform: translateY(100vh);
+        transform: translateY(calc(100vh - 60px)); /* 100vh é a altura da tela, e 60px é aproximadamente a altura do botão */
       }
     }
   </style>
@@ -209,40 +213,19 @@
         currentQuestion++;
       
         if (currentQuestion >= quiz[currentRound].questions.length) {
-          if (correctAnswers >= 2) {
-            currentRound++;
-            currentQuestion = 0;
-      
-            if (currentRound >= quiz.length) {
-              finishQuiz();
-              return;
-            }
-            startRound();
+          currentRound++;
+          if (currentRound >= quiz.length) {
+            // Final do jogo
+            announcementElement.textContent = "Parabéns! Você ganhou!";
+            startHeavyHeartRain(); // Chuva densa de corações
           } else {
-            if (currentRound < quiz.length - 1) {
-              showAnnouncement("Que pena você errou tudo 😔");
-              currentRound++;
-              currentQuestion = 0;
-              setTimeout(startRound, 2000);
-            } else {
-              finishQuiz();
-            }
+            currentQuestion = 0;
+            startRound();
           }
         } else {
           loadQuestion();
         }
-      };
-
-    function finishQuiz() {
-      questionElement.textContent = correctAnswers >= 2
-        ? "Parabéns! Você ganhou!"
-        : "Fim do jogo. Tente novamente!";
-      optionsElement.innerHTML = "";
-      nextButton.classList.add("hidden");
-      if (correctAnswers >= 2) {
-        startHeavyHeartRain(); // Chuva densa de corações
-      }
-    }
+    };
 
     function startLightHeartRain() {
       for (let i = 0; i < 5; i++) {
@@ -262,27 +245,34 @@
     }
 
     function startHeavyHeartRain() {
-      document.body.style.backgroundColor = "red"; // Fundo vermelho
-
-      for (let i = 0; i < 500; i++) { // Muito coração
-        const heart = document.createElement("div");
-        heart.classList.add("heart");
-        heart.textContent = "❤️";
-        heart.style.left = `${Math.random() * 100}%`;
-        heart.style.top = `${Math.random() * -50}%`;
-        heart.style.animationDuration = `${Math.random() * 0.5 + 1}s`;
-
-        document.body.appendChild(heart);
-
+        document.body.innerHTML = ""; // Remove todos os elementos da tela
+        
+        // Inicia com o fundo vermelho
+        document.body.style.backgroundColor = "red"; 
+        document.body.style.transition = "background-color 4s"; // Define a transição de cor
+        
+        // Após 3 segundos, começa a transição para azul
         setTimeout(() => {
-          heart.remove();
-        }, 4000);
+          document.body.style.backgroundColor = "blue"; // Muda para o fundo azul
+        }, 3000); // Inicia após 3 segundos
+      
+        for (let i = 0; i < 200; i++) { // Muito coração
+          const heart = document.createElement("div");
+          heart.classList.add("heart");
+          heart.textContent = "❤️";
+          heart.style.left = `${Math.random() * 100}%`;
+          heart.style.top = `${Math.random() * -50}%`;
+          heart.style.animationDuration = `${Math.random() * 0.5 + 1}s`;
+      
+          document.body.appendChild(heart);
+      
+          setTimeout(() => {
+            heart.remove();
+          }, 4000);
+        }
+      
       }
       
-      setTimeout(() => {
-        document.body.style.backgroundColor = "#f9f9f9"; // Restaura fundo
-      }, 4000);
-    }
   </script>
 </body>
 </html>
