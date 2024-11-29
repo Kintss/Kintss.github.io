@@ -60,8 +60,8 @@
       }
     .heart {
       position: absolute;
-      font-size: 24px;
-      animation: fall 2s linear infinite;
+      font-size: 48px;
+      animation: fall 5s linear infinite;
       z-index: 10; /* Para garantir que os corações apareçam acima de outros elementos */
     }
 
@@ -254,7 +254,7 @@
         // Após 3 segundos, começa a transição para azul
         setTimeout(() => {
           document.body.style.backgroundColor = "blue"; // Muda para o fundo azul
-        }, 3000); // Inicia após 3 segundos
+        }, 5000); // Inicia após 3 segundos
       
         for (let i = 0; i < 200; i++) { // Muito coração
           const heart = document.createElement("div");
@@ -268,9 +268,10 @@
       
           setTimeout(() => {
             heart.remove();
-          }, 4000);
+          }, 5000);
         }
       
+        // Não é necessário restaurar o fundo, pois o fundo permanecerá azul após a transição
       }
       
   </script>
