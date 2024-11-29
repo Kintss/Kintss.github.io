@@ -43,53 +43,33 @@
       display: none;
     }
     #score {
-      font-weight: bold;
-      background-color: #fff;
-      border: 2px solid #ddd;
-      border-radius: 5px;
-      padding: 5px 10px;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-      margin-top: 20px;
-      display: inline-block;
-      text-align: center;
+        font-weight: bold;
+        background-color: #fff;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        padding: 5px 10px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+        display: inline-block;
+        position: static; /* Remove a posição absoluta */
+        text-align: center;
     }
-    /* Estilos da animação do coração */
-    svg {
-      margin-top: 10px;
+
+    /* Estilos para a chuva de corações */
+    .heart {
+      position: absolute;
+      font-size: 30px;
+      animation: fall 2s ease-in infinite;
     }
-    svg #line {
-      fill: none;
-      stroke: #e00000;
-      stroke-width: 1.5;
-      stroke-linecap: butt;
-      stroke-linejoin: round;
-      stroke-miterlimit: 4;
-      stroke-opacity: 1;
-      stroke-dasharray: 1;
-      stroke-dashoffset: 1;
-      animation: dash 3s linear infinite;
-    }
-    svg #point {
-      fill: none;
-      stroke: #f00000;
-      stroke-width: 5;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-miterlimit: 0.1;
-      stroke-opacity: 1;
-      stroke-dasharray: 0.0001, 0.9999;
-      stroke-dashoffset: 1;
-      animation: dash 3s linear infinite;
-    }
-    @keyframes dash {
+
+    @keyframes fall {
       0% {
-        stroke-dashoffset: 1;
-      }
-      80% {
-        stroke-dashoffset: 0;
+        transform: translateY(-100px);
+        opacity: 1;
       }
       100% {
-        stroke-dashoffset: 0;
+        transform: translateY(500px);
+        opacity: 0;
       }
     }
   </style>
@@ -118,24 +98,173 @@
   </div>
 
   <div id="score">Acertos: 0</div>
-  <!-- Adição da animação de coração -->
-  <svg xmlns="http://www.w3.org/2000/svg" id="svg5" version="1.1" viewBox="-5 -5 278 56">
-    <filter id="blur">
-      <feGaussianBlur stdDeviation="1.6" />
-    </filter>
-    <g id="layer1" transform="translate(29.1 -127.42)">
-      <path id="line" d="M-28.73 167.2c26.43 9.21 68.46-9.46 85.45-12.03 18.45-2.78 32.82 4.86 28.75 9.83-3.82 4.66-25.77-21.18-14.81-31.5 9.54-8.98 17.64 10.64 16.42 17.06-1.51-6.2 2.95-26.6 14.74-22.11 11.7 4.46-4.33 49.03-15.44 44.08-6.97-3.1 15.44-16.26 26.1-16 23.03.56 55.6 27.51 126.63 3.36" pathLength="1" />
-    </g>
-    <g id="layer2" transform="translate(29.1 -127.42)">
-      <path filter="url(#blur)" id="point" d="M-28.73 167.2c26.43 9.21 68.46-9.46 85.45-12.03 18.45-2.78 32.82 4.86 28.75 9.83-3.82 4.66-25.77-21.18-14.81-31.5 9.54-8.98 17.64 10.64 16.42 17.06-1.51-6.2 2.95-26.6 14.74-22.11 11.7 4.46-4.33 49.03-15.44 44.08-6.97-3.1 15.44-16.26 26.1-16 23.03.56 55.6 27.51 126.63 3.36" pathLength="1" />
-    </g>
-  </svg>
 
   <audio id="correct-audio" src="yeah.mp3"></audio>
   <audio id="wrong-audio" src="error.mp3"></audio>
 
   <script>
-    // Seu código JavaScript aqui
+    const quiz = [
+      { 
+        level: "Rodada 1",
+        questions: [
+          { question: "Qual era o clima exato no dia em que nos conhecemos?", options: ["23°C e ensolarado", "21°C com 50% de umidade", "22°C e parcialmente nublado", "26°C e céu limpo"], correct: -1 },
+          { question: "Quantas vezes piscamos juntos no nosso primeiro dia como casal?", options: ["1.452", "42", "1.530", "628"], correct: -1 },
+          { question: "Quantas mensagens trocamos no primeiro dia em que começamos a conversar?", options: ["87", "112", "168", "150"], correct: -1 }
+        ]
+      },
+      { 
+        level: "Rodada 2",
+        questions: [
+          { question: "Qual era o horário exato do nosso primeiro encontro?", options: ["19:32", "18:00", "19:45", "19:50"], correct: -1 },
+          { question: "O que você pediu para beber no nosso primeiro jantar?", options: ["Suco de fruta", "Água com gás", "Refrigerante", "Vinho"], correct: -1 },
+          { question: "Qual foi a primeira comida que preparamos juntos?", options: ["Macarrão carbonara", "Omelete", "Cookies", "Bolo"], correct: -1 }
+        ]
+      },
+      { 
+        level: "Rodada 3",
+        questions: [
+          { question: "Quem é a pessoa mais importante da minha vida?", options: ["Gabriella Torres", "-", "-", "-"], correct: 0 },
+          { question: "Qual é o meu nome?", options: ["Hygor Quintes dos Santos", "Igor Rintes dos Santos", "Igor Quintes dos Santos", "Quintes dos Santos Igor"], correct: 2 },
+          { question: "Qual é a cor dos meus olhos?", options: ["Vermelho", "Roxo", "Arco-íris", "Castanho"], correct: 3 }
+        ]
+      }
+    ];
+
+    let currentRound = 0;
+    let currentQuestion = 0;
+    let correctAnswers = 0;
+
+    const rulesElement = document.getElementById("rules");
+    const gameElement = document.getElementById("game");
+    const questionElement = document.getElementById("question");
+    const optionsElement = document.getElementById("options");
+    const nextButton = document.getElementById("next-button");
+    const announcementElement = document.getElementById("announcement");
+    const scoreElement = document.getElementById("score");
+    const correctAudio = document.getElementById("correct-audio");
+    const wrongAudio = document.getElementById("wrong-audio");
+
+    document.getElementById("start-button").onclick = startQuiz;
+
+    function startQuiz() {
+      rulesElement.classList.add("hidden");
+      gameElement.classList.remove("hidden");
+      startRound();
+    }
+
+    function startRound() {
+      correctAnswers = 0;
+      updateScore();
+      showAnnouncement(quiz[currentRound].level);
+    }
+
+    function showAnnouncement(message) {
+      questionElement.innerHTML = "";
+      optionsElement.innerHTML = "";
+      nextButton.classList.add("hidden");
+
+      announcementElement.textContent = message;
+      announcementElement.classList.remove("hidden");
+      setTimeout(() => {
+        announcementElement.classList.add("hidden");
+        loadQuestion();
+      }, 2000);
+    }
+
+    function loadQuestion() {
+      const round = quiz[currentRound];
+      const questionData = round.questions[currentQuestion];
+
+      questionElement.textContent = questionData.question;
+      optionsElement.innerHTML = "";
+      nextButton.classList.add("hidden");
+
+      questionData.options.forEach((option, index) => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.onclick = () => handleAnswer(index, button);
+        optionsElement.appendChild(button);
+      });
+    }
+
+    function handleAnswer(selected, button) {
+      const round = quiz[currentRound];
+      const questionData = round.questions[currentQuestion];
+
+      if (selected === questionData.correct) {
+        correctAudio.play();
+        button.classList.add("correct");
+        correctAnswers++;
+        updateScore();
+        createHeartRain();  // Chama a função para a chuva de corações
+      } else {
+        wrongAudio.play();
+        button.classList.add("wrong");
+        if ("vibrate" in navigator) navigator.vibrate(200);
+      }
+
+      Array.from(optionsElement.children).forEach(btn => btn.disabled = true);
+      nextButton.classList.remove("hidden");
+    }
+
+    function createHeartRain() {
+      const heartCount = 20; // Número de corações a serem criados
+      for (let i = 0; i < heartCount; i++) {
+        const heart = document.createElement("div");
+        heart.classList.add("heart");
+        heart.textContent = "❤️";
+        heart.style.left = `${Math.random() * 100}%`;  // Posição aleatória na tela
+        heart.style.animationDuration = `${Math.random() * 2 + 2}s`;  // Tempo de queda aleatório
+        document.body.appendChild(heart);
+        
+        // Remover o coração da tela após a animação
+        setTimeout(() => {
+          heart.remove();
+        }, 2500);
+      }
+    }
+
+    function updateScore() {
+      scoreElement.textContent = `Acertos: ${correctAnswers}`;
+    }
+
+    nextButton.onclick = () => {
+      currentQuestion++;
+    
+      if (currentQuestion >= quiz[currentRound].questions.length) {
+        if (correctAnswers >= 2) {
+          currentRound++;
+          currentQuestion = 0;
+    
+          if (currentRound >= quiz.length) {
+            finishQuiz();
+            return;
+          }
+          startRound();
+        } else {
+          // Caso erre todas as perguntas da rodada 1 ou 2
+          if (currentRound < quiz.length - 1) {
+            showAnnouncement("Que pena você errou tudo 😔");
+            currentRound++;
+            currentQuestion = 0;
+            setTimeout(startRound, 2000); // Continuar para a próxima rodada
+          } else {
+            // Finalizar o jogo na última rodada
+            finishQuiz();
+          }
+        }
+      } else {
+        loadQuestion();
+      }
+    };
+
+    function finishQuiz() {
+      questionElement.textContent = correctAnswers >= 2
+        ? "Parabéns! Você ganhou!"
+        : "Fim do jogo. Tente novamente!";
+      optionsElement.innerHTML = "";
+      nextButton.classList.add("hidden");
+    }
   </script>
 
 </body>
