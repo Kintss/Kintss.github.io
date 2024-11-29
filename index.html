@@ -11,7 +11,7 @@
       text-align: center;
       padding: 20px;
     }
-    .question-box {
+    .box {
       background: #fff;
       padding: 20px;
       margin: 20px auto;
@@ -21,11 +21,7 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-    .question {
-      font-size: 18px;
-      margin-bottom: 15px;
-    }
-    .options button {
+    button {
       display: block;
       width: 100%;
       margin: 10px 0;
@@ -46,17 +42,43 @@
     .hidden {
       display: none;
     }
+    #score {
+      font-weight: bold;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #fff;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      padding: 5px 10px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
   </style>
 </head>
 <body>
 
   <h1>Quiz do Amor ❤️</h1>
   <div id="quiz-container">
-    <div class="question-box">
-      <div id="question" class="question">Clique para começar o quiz!</div>
-      <div id="options" class="options"></div>
+    <div id="rules" class="box">
+      <h2>Regras do Jogo</h2>
+      <ul style="text-align: left;">
+        <p>O jogo será dividido em 3 rodadas, e as perguntas vão ficando mais fáceis a cada rodada. O objetivo é acertar pelo menos 2 das 3 perguntas de uma rodada para ganhar o prêmio correspondente.</p>
+        <li>Na 3ª rodada, o prêmio ⭐⭐⭐.</li>
+        <li>Na 2ª rodada, o prêmio ⭐⭐.</li>
+        <li>Na 1ª rodada, o prêmio ⭐.</li>
+      </ul>
+      <p>Boa sorte! ❤️</p>
+      <button id="start-button">Começar</button>
+    </div>
+    <div id="game" class="box hidden">
+      <div id="announcement" class="hidden"></div>
+      <div id="question"></div>
+      <div id="options"></div>
+      <button id="next-button" class="hidden">Continuar</button>
     </div>
   </div>
+
+  <div id="score">Acertos: 0</div>
 
   <audio id="correct-audio" src="yeah.mp3"></audio>
   <audio id="wrong-audio" src="error.mp3"></audio>
@@ -64,24 +86,27 @@
   <script>
     const quiz = [
       { 
-        level: "Nível 1",
+        level: "Rodada 1",
         questions: [
-          { question: "Quantos passos demos no nosso primeiro encontro?", options: ["2.356", "1.948", "3.127", "Quem sabe?"], correct: 3 },
-          { question: "Quantas estrelas no céu eu contei pensando em você?", options: ["1.000", "Infinito", "5", "Nenhuma"], correct: 1 }
+          { question: "Pergunta 1 da Rodada 1?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 0 },
+          { question: "Pergunta 2 da Rodada 1?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 1 },
+          { question: "Pergunta 3 da Rodada 1?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 2 }
         ]
       },
       { 
-        level: "Nível 2",
+        level: "Rodada 2",
         questions: [
-          { question: "Qual foi o dia exato em que nos conhecemos?", options: ["10/01", "15/02", "20/03", "25/04"], correct: 0 },
-          { question: "Qual roupa eu usava no nosso primeiro encontro?", options: ["Camisa branca", "Camiseta azul", "Terno", "Moleton"], correct: 1 }
+          { question: "Pergunta 1 da Rodada 2?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 3 },
+          { question: "Pergunta 2 da Rodada 2?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 2 },
+          { question: "Pergunta 3 da Rodada 2?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 1 }
         ]
       },
       { 
-        level: "Nível 3",
+        level: "Rodada 3",
         questions: [
-          { question: "Qual é o meu nome?", options: ["Pedro", "Carlos", "João", "Você sabe!"], correct: 3 },
-          { question: "O que eu mais amo em você?", options: ["Sorriso", "Tudo", "Risada", "Seus olhos"], correct: 1 }
+          { question: "Pergunta 1 da Rodada 3?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 0 },
+          { question: "Pergunta 2 da Rodada 3?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 1 },
+          { question: "Pergunta 3 da Rodada 3?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 2 }
         ]
       }
     ];
@@ -90,10 +115,42 @@
     let currentQuestion = 0;
     let correctAnswers = 0;
 
+    const rulesElement = document.getElementById("rules");
+    const gameElement = document.getElementById("game");
     const questionElement = document.getElementById("question");
     const optionsElement = document.getElementById("options");
+    const nextButton = document.getElementById("next-button");
+    const announcementElement = document.getElementById("announcement");
+    const scoreElement = document.getElementById("score");
     const correctAudio = document.getElementById("correct-audio");
     const wrongAudio = document.getElementById("wrong-audio");
+
+    document.getElementById("start-button").onclick = startQuiz;
+
+    function startQuiz() {
+      rulesElement.classList.add("hidden");
+      gameElement.classList.remove("hidden");
+      startRound();
+    }
+
+    function startRound() {
+      correctAnswers = 0;
+      updateScore();
+      showAnnouncement(quiz[currentRound].level);
+    }
+
+    function showAnnouncement(message) {
+      questionElement.innerHTML = "";
+      optionsElement.innerHTML = "";
+      nextButton.classList.add("hidden");
+
+      announcementElement.textContent = message;
+      announcementElement.classList.remove("hidden");
+      setTimeout(() => {
+        announcementElement.classList.add("hidden");
+        loadQuestion();
+      }, 2000);
+    }
 
     function loadQuestion() {
       const round = quiz[currentRound];
@@ -101,48 +158,67 @@
 
       questionElement.textContent = questionData.question;
       optionsElement.innerHTML = "";
+      nextButton.classList.add("hidden");
 
       questionData.options.forEach((option, index) => {
         const button = document.createElement("button");
         button.textContent = option;
-        button.onclick = () => handleAnswer(index);
+        button.onclick = () => handleAnswer(index, button);
         optionsElement.appendChild(button);
       });
     }
 
-    function handleAnswer(selected) {
+    function handleAnswer(selected, button) {
       const round = quiz[currentRound];
       const questionData = round.questions[currentQuestion];
 
       if (selected === questionData.correct) {
         correctAudio.play();
+        button.classList.add("correct");
         correctAnswers++;
+        updateScore();
       } else {
         wrongAudio.play();
+        button.classList.add("wrong");
         if ("vibrate" in navigator) navigator.vibrate(200);
       }
 
+      Array.from(optionsElement.children).forEach(btn => btn.disabled = true);
+      nextButton.classList.remove("hidden");
+    }
+
+    function updateScore() {
+      scoreElement.textContent = `Acertos: ${correctAnswers}`;
+    }
+
+    nextButton.onclick = () => {
       currentQuestion++;
 
-      if (currentQuestion >= round.questions.length) {
-        currentRound++;
-        currentQuestion = 0;
+      if (currentQuestion >= quiz[currentRound].questions.length) {
+        if (correctAnswers >= 2) {
+          currentRound++;
+          currentQuestion = 0;
 
-        if (currentRound >= quiz.length || correctAnswers >= 3) {
+          if (currentRound >= quiz.length) {
+            finishQuiz();
+            return;
+          }
+          startRound();
+        } else {
           finishQuiz();
-          return;
         }
+      } else {
+        loadQuestion();
       }
-
-      loadQuestion();
-    }
+    };
 
     function finishQuiz() {
-      questionElement.textContent = "Parabéns! O quiz terminou!";
-      optionsElement.innerHTML = `<p>Você acertou ${correctAnswers} perguntas!</p>`;
+      questionElement.textContent = correctAnswers >= 2
+        ? "Parabéns! Você ganhou!"
+        : "Fim do jogo. Tente novamente!";
+      optionsElement.innerHTML = "";
+      nextButton.classList.add("hidden");
     }
-
-    questionElement.onclick = loadQuestion; // Inicia ao clicar
   </script>
 
 </body>
