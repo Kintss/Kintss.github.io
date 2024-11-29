@@ -44,14 +44,53 @@
     }
     #score {
       font-weight: bold;
-      position: absolute;
-      top: 20px;
-      right: 20px;
       background-color: #fff;
       border: 2px solid #ddd;
       border-radius: 5px;
       padding: 5px 10px;
       box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+      display: inline-block;
+      text-align: center;
+    }
+    /* Estilos da animação do coração */
+    svg {
+      margin-top: 10px;
+    }
+    svg #line {
+      fill: none;
+      stroke: #e00000;
+      stroke-width: 1.5;
+      stroke-linecap: butt;
+      stroke-linejoin: round;
+      stroke-miterlimit: 4;
+      stroke-opacity: 1;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: dash 3s linear infinite;
+    }
+    svg #point {
+      fill: none;
+      stroke: #f00000;
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 0.1;
+      stroke-opacity: 1;
+      stroke-dasharray: 0.0001, 0.9999;
+      stroke-dashoffset: 1;
+      animation: dash 3s linear infinite;
+    }
+    @keyframes dash {
+      0% {
+        stroke-dashoffset: 1;
+      }
+      80% {
+        stroke-dashoffset: 0;
+      }
+      100% {
+        stroke-dashoffset: 0;
+      }
     }
   </style>
 </head>
@@ -63,9 +102,9 @@
       <h2>Regras do Jogo</h2>
       <ul style="text-align: left;">
         <p>O jogo será dividido em 3 rodadas, e as perguntas vão ficando mais fáceis a cada rodada. O objetivo é acertar pelo menos 2 das 3 perguntas de uma rodada para ganhar o prêmio correspondente.</p>
-        <li>Na 3ª rodada, o prêmio ⭐⭐⭐.</li>
+        <li>Na 1ª rodada, o prêmio ⭐⭐⭐.</li>
         <li>Na 2ª rodada, o prêmio ⭐⭐.</li>
-        <li>Na 1ª rodada, o prêmio ⭐.</li>
+        <li>Na 3ª rodada, o prêmio ⭐.</li>
       </ul>
       <p>Boa sorte! ❤️</p>
       <button id="start-button">Começar</button>
@@ -79,146 +118,24 @@
   </div>
 
   <div id="score">Acertos: 0</div>
+  <!-- Adição da animação de coração -->
+  <svg xmlns="http://www.w3.org/2000/svg" id="svg5" version="1.1" viewBox="-5 -5 278 56">
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="1.6" />
+    </filter>
+    <g id="layer1" transform="translate(29.1 -127.42)">
+      <path id="line" d="M-28.73 167.2c26.43 9.21 68.46-9.46 85.45-12.03 18.45-2.78 32.82 4.86 28.75 9.83-3.82 4.66-25.77-21.18-14.81-31.5 9.54-8.98 17.64 10.64 16.42 17.06-1.51-6.2 2.95-26.6 14.74-22.11 11.7 4.46-4.33 49.03-15.44 44.08-6.97-3.1 15.44-16.26 26.1-16 23.03.56 55.6 27.51 126.63 3.36" pathLength="1" />
+    </g>
+    <g id="layer2" transform="translate(29.1 -127.42)">
+      <path filter="url(#blur)" id="point" d="M-28.73 167.2c26.43 9.21 68.46-9.46 85.45-12.03 18.45-2.78 32.82 4.86 28.75 9.83-3.82 4.66-25.77-21.18-14.81-31.5 9.54-8.98 17.64 10.64 16.42 17.06-1.51-6.2 2.95-26.6 14.74-22.11 11.7 4.46-4.33 49.03-15.44 44.08-6.97-3.1 15.44-16.26 26.1-16 23.03.56 55.6 27.51 126.63 3.36" pathLength="1" />
+    </g>
+  </svg>
 
   <audio id="correct-audio" src="yeah.mp3"></audio>
   <audio id="wrong-audio" src="error.mp3"></audio>
 
   <script>
-    const quiz = [
-      { 
-        level: "Rodada 1",
-        questions: [
-          { question: "Pergunta 1 da Rodada 1?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 0 },
-          { question: "Pergunta 2 da Rodada 1?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 1 },
-          { question: "Pergunta 3 da Rodada 1?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 2 }
-        ]
-      },
-      { 
-        level: "Rodada 2",
-        questions: [
-          { question: "Pergunta 1 da Rodada 2?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 3 },
-          { question: "Pergunta 2 da Rodada 2?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 2 },
-          { question: "Pergunta 3 da Rodada 2?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 1 }
-        ]
-      },
-      { 
-        level: "Rodada 3",
-        questions: [
-          { question: "Pergunta 1 da Rodada 3?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 0 },
-          { question: "Pergunta 2 da Rodada 3?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 1 },
-          { question: "Pergunta 3 da Rodada 3?", options: ["Opção A", "Opção B", "Opção C", "Opção D"], correct: 2 }
-        ]
-      }
-    ];
-
-    let currentRound = 0;
-    let currentQuestion = 0;
-    let correctAnswers = 0;
-
-    const rulesElement = document.getElementById("rules");
-    const gameElement = document.getElementById("game");
-    const questionElement = document.getElementById("question");
-    const optionsElement = document.getElementById("options");
-    const nextButton = document.getElementById("next-button");
-    const announcementElement = document.getElementById("announcement");
-    const scoreElement = document.getElementById("score");
-    const correctAudio = document.getElementById("correct-audio");
-    const wrongAudio = document.getElementById("wrong-audio");
-
-    document.getElementById("start-button").onclick = startQuiz;
-
-    function startQuiz() {
-      rulesElement.classList.add("hidden");
-      gameElement.classList.remove("hidden");
-      startRound();
-    }
-
-    function startRound() {
-      correctAnswers = 0;
-      updateScore();
-      showAnnouncement(quiz[currentRound].level);
-    }
-
-    function showAnnouncement(message) {
-      questionElement.innerHTML = "";
-      optionsElement.innerHTML = "";
-      nextButton.classList.add("hidden");
-
-      announcementElement.textContent = message;
-      announcementElement.classList.remove("hidden");
-      setTimeout(() => {
-        announcementElement.classList.add("hidden");
-        loadQuestion();
-      }, 2000);
-    }
-
-    function loadQuestion() {
-      const round = quiz[currentRound];
-      const questionData = round.questions[currentQuestion];
-
-      questionElement.textContent = questionData.question;
-      optionsElement.innerHTML = "";
-      nextButton.classList.add("hidden");
-
-      questionData.options.forEach((option, index) => {
-        const button = document.createElement("button");
-        button.textContent = option;
-        button.onclick = () => handleAnswer(index, button);
-        optionsElement.appendChild(button);
-      });
-    }
-
-    function handleAnswer(selected, button) {
-      const round = quiz[currentRound];
-      const questionData = round.questions[currentQuestion];
-
-      if (selected === questionData.correct) {
-        correctAudio.play();
-        button.classList.add("correct");
-        correctAnswers++;
-        updateScore();
-      } else {
-        wrongAudio.play();
-        button.classList.add("wrong");
-        if ("vibrate" in navigator) navigator.vibrate(200);
-      }
-
-      Array.from(optionsElement.children).forEach(btn => btn.disabled = true);
-      nextButton.classList.remove("hidden");
-    }
-
-    function updateScore() {
-      scoreElement.textContent = `Acertos: ${correctAnswers}`;
-    }
-
-    nextButton.onclick = () => {
-      currentQuestion++;
-
-      if (currentQuestion >= quiz[currentRound].questions.length) {
-        if (correctAnswers >= 2) {
-          currentRound++;
-          currentQuestion = 0;
-
-          if (currentRound >= quiz.length) {
-            finishQuiz();
-            return;
-          }
-          startRound();
-        } else {
-          finishQuiz();
-        }
-      } else {
-        loadQuestion();
-      }
-    };
-
-    function finishQuiz() {
-      questionElement.textContent = correctAnswers >= 2
-        ? "Parabéns! Você ganhou!"
-        : "Fim do jogo. Tente novamente!";
-      optionsElement.innerHTML = "";
-      nextButton.classList.add("hidden");
-    }
+    // Seu código JavaScript aqui
   </script>
 
 </body>
