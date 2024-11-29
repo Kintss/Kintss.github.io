@@ -10,6 +10,7 @@
       background-color: #f9f9f9;
       text-align: center;
       padding: 20px;
+      transition: background-color 1s ease;
     }
     .box {
       background: #fff;
@@ -51,25 +52,18 @@
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         margin-top: 20px;
         display: inline-block;
-        position: static; /* Remove a posição absoluta */
+        position: static;
         text-align: center;
-    }
-
-    /* Estilos para a chuva de corações */
+      }
     .heart {
       position: absolute;
-      font-size: 30px;
-      animation: fall 2s ease-in infinite;
+      font-size: 24px;
+      animation: fall 2s linear infinite;
     }
 
     @keyframes fall {
-      0% {
-        transform: translateY(-100px);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(500px);
-        opacity: 0;
+      to {
+        transform: translateY(100vh);
       }
     }
   </style>
@@ -196,7 +190,7 @@
         button.classList.add("correct");
         correctAnswers++;
         updateScore();
-        createHeartRain();  // Chama a função para a chuva de corações
+        startLightHeartRain(); // Leve chuva de corações
       } else {
         wrongAudio.play();
         button.classList.add("wrong");
@@ -207,56 +201,37 @@
       nextButton.classList.remove("hidden");
     }
 
-    function createHeartRain() {
-      const heartCount = 20; // Número de corações a serem criados
-      for (let i = 0; i < heartCount; i++) {
-        const heart = document.createElement("div");
-        heart.classList.add("heart");
-        heart.textContent = "❤️";
-        heart.style.left = `${Math.random() * 100}%`;  // Posição aleatória na tela
-        heart.style.animationDuration = `${Math.random() * 2 + 2}s`;  // Tempo de queda aleatório
-        document.body.appendChild(heart);
-        
-        // Remover o coração da tela após a animação
-        setTimeout(() => {
-          heart.remove();
-        }, 2500);
-      }
-    }
-
     function updateScore() {
       scoreElement.textContent = `Acertos: ${correctAnswers}`;
     }
 
     nextButton.onclick = () => {
-      currentQuestion++;
-    
-      if (currentQuestion >= quiz[currentRound].questions.length) {
-        if (correctAnswers >= 2) {
-          currentRound++;
-          currentQuestion = 0;
-    
-          if (currentRound >= quiz.length) {
-            finishQuiz();
-            return;
-          }
-          startRound();
-        } else {
-          // Caso erre todas as perguntas da rodada 1 ou 2
-          if (currentRound < quiz.length - 1) {
-            showAnnouncement("Que pena você errou tudo 😔");
+        currentQuestion++;
+      
+        if (currentQuestion >= quiz[currentRound].questions.length) {
+          if (correctAnswers >= 2) {
             currentRound++;
             currentQuestion = 0;
-            setTimeout(startRound, 2000); // Continuar para a próxima rodada
+      
+            if (currentRound >= quiz.length) {
+              finishQuiz();
+              return;
+            }
+            startRound();
           } else {
-            // Finalizar o jogo na última rodada
-            finishQuiz();
+            if (currentRound < quiz.length - 1) {
+              showAnnouncement("Que pena você errou tudo 😔");
+              currentRound++;
+              currentQuestion = 0;
+              setTimeout(startRound, 2000);
+            } else {
+              finishQuiz();
+            }
           }
+        } else {
+          loadQuestion();
         }
-      } else {
-        loadQuestion();
-      }
-    };
+      };
 
     function finishQuiz() {
       questionElement.textContent = correctAnswers >= 2
@@ -264,8 +239,50 @@
         : "Fim do jogo. Tente novamente!";
       optionsElement.innerHTML = "";
       nextButton.classList.add("hidden");
+      if (correctAnswers >= 2) {
+        startHeavyHeartRain(); // Chuva densa de corações
+      }
+    }
+
+    function startLightHeartRain() {
+      for (let i = 0; i < 5; i++) {
+        const heart = document.createElement("div");
+        heart.classList.add("heart");
+        heart.textContent = "❤️";
+        heart.style.left = `${Math.random() * 100}%`;
+        heart.style.top = `${Math.random() * -50}%`;
+        heart.style.animationDuration = `${Math.random() * 0.5 + 1}s`;
+
+        document.body.appendChild(heart);
+
+        setTimeout(() => {
+          heart.remove();
+        }, 2500);
+      }
+    }
+
+    function startHeavyHeartRain() {
+      document.body.style.backgroundColor = "red"; // Fundo vermelho
+
+      for (let i = 0; i < 500; i++) { // Muito coração
+        const heart = document.createElement("div");
+        heart.classList.add("heart");
+        heart.textContent = "❤️";
+        heart.style.left = `${Math.random() * 100}%`;
+        heart.style.top = `${Math.random() * -50}%`;
+        heart.style.animationDuration = `${Math.random() * 0.5 + 1}s`;
+
+        document.body.appendChild(heart);
+
+        setTimeout(() => {
+          heart.remove();
+        }, 4000);
+      }
+      
+      setTimeout(() => {
+        document.body.style.backgroundColor = "#f9f9f9"; // Restaura fundo
+      }, 4000);
     }
   </script>
-
 </body>
 </html>
